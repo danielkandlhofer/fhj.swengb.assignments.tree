@@ -1,4 +1,4 @@
-package fhj.swengb.assignments.tree.rladstaetter
+package fhj.swengb.assignments.tree.dkandlhofer
 
 import javafx.scene.paint.Color
 
