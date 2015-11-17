@@ -39,9 +39,14 @@ object Graph {
     * @param convert a converter function
     * @return
     */
-  def traverse[A, B](tree: Tree[A])(convert: A => B): Seq[B] =  {
-      ???
-  }
+
+  def traverse[A, B](tree: Tree[A])(convert: Seq[A] => Seq[B]): Seq[B] = {
+    def map[A](tree1: Tree[A],acc: Seq[A]): Seq[A] = tree1 match {
+      case Branch(l,r) => map(l,acc);map(r,acc)
+      case Node(a) => Seq(a) ++ acc
+    }
+    convert(map(tree,Nil))
+    }
 
   /**
     * Creates a tree graph.
@@ -64,7 +69,16 @@ object Graph {
               angle: Double = 45.0,
               colorMap: Map[Int, Color] = Graph.colorMap): Tree[L2D] = {
     assert(treeDepth <= colorMap.size, s"Treedepth higher than color mappings - bailing out ...")
-    ???
+
+    def createGraph(start:Pt2D, iA:AngleInDegrees,len:Double,depth:Int,factor:Double,angle:Double): Tree[L2D] = depth match {
+      case 0 => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
+      case _ => Branch(Node(L2D.apply(start,initialAngle-angle,length*factor,colorMap(0))),Node(L2D.apply(start,initialAngle+angle,length*factor,colorMap(1))))//;createGraph(start,iA,len*factor,depth-1,factor,angle)
+      //case _ => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
+    }
+    createGraph(start,initialAngle,length,treeDepth,factor,angle)
+
+
+    //mkGraph(Pt2D(0, 0), 0, 100, 0, 1, 0)
  }
 
 }
@@ -104,8 +118,8 @@ object L2D {
     * @return
     */
   def apply(start: Pt2D, angle: AngleInDegrees, length: Double, color: Color): L2D = {
-    val endx = Math.sin(toRadiants(angle))*length + start.x
-    val endy = Math.cos(toRadiants(angle))*length + start.y
+    val endx = round(Math.cos(toRadiants(angle))*length + start.x)
+    val endy = round(Math.sin(toRadiants(angle))*length + start.y)
     val end = Pt2D(endx,endy)
     L2D(start,end,color)
   }
