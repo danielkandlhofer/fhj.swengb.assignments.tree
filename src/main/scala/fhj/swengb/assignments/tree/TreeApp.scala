@@ -38,8 +38,8 @@ class TreeApp extends javafx.application.Application {
     val scene = new Scene(loader.getRoot[Parent])
     stage.setScene(scene)
     stage.show()
-
-  } catch {
+  }
+  catch {
     case NonFatal(e) => {
       e.printStackTrace()
     }

@@ -41,14 +41,14 @@ object Graph {
     * @return
     */
 
-  def traverse[A, B](tree: Tree[A])(convert: Seq[A] => Seq[B]): Seq[B] ={
+  def traverse[A, B](tree: Tree[A])(convert: A => B): Seq[B] = {
+    def map[A, B](t: Tree[A],acc: Seq[B])(convert: A => B): Seq[B] = t match {
+      case Node(v) => convert(v) +: acc
+      case Branch(l,r) => map(l,acc)(convert) ++ acc ++ map(r,acc)(convert)
+    }
+    map(tree,acc = Nil)(convert)
+    }
 
-    def map(t: Tree[A],acc: Seq[A]): Seq[A] = t match {
-      case Node(v) => Seq(v) ++ acc
-      case Branch(l,r) => map(l,acc) ++ acc ++ map(r,acc)
-    }
-    convert(map(tree,Seq()))
-    }
 
   /**
     * Creates a tree graph.
@@ -72,23 +72,16 @@ object Graph {
               colorMap: Map[Int, Color] = Graph.colorMap): Tree[L2D] = {
     assert(treeDepth <= colorMap.size, s"Treedepth higher than color mappings - bailing out ...")
 
-    val rootNode = Node(L2D.apply(start,initialAngle,length,colorMap(0)))
-    val tree1 = Branch(rootNode, Branch(Node(L2D.apply(start,initialAngle-angle,length,colorMap(0))),Node(L2D.apply(start,initialAngle+angle,length,colorMap(0)))))
-
-    def createGraph(start:Pt2D, iA:AngleInDegrees,len:Double,depth:Int,factor:Double,angle:Double): Tree[L2D] = depth match {
-      case 0 => rootNode
-      case v if v >0 => tree1
-      /*{
-        Branch(Node(L2D.apply(start, initialAngle - angle, length, colorMap(0))), Node(L2D.apply(start, initialAngle + angle, length, colorMap(0))))
-        //createGraph(start, iA, len - factor, depth - 1, factor, angle)
-      }*/
-      case _ => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
+    def createGraph(start:L2D, acc: Int): Tree[L2D] = acc match {
+      case root if treeDepth == 0 => Node(start)
+      case nodes if acc == treeDepth => Branch(Node(start),Branch(Node(start.left(factor,angle,colorMap(acc-1))),Node(start.right(factor,angle,colorMap(acc-1)))))
+      case _ => Branch(Node(start),Branch(createGraph(start.left(factor,angle,colorMap(acc-1)),acc+1),createGraph(start.right(factor,angle,colorMap(acc-1)),acc+1)))
     }
-    createGraph(start,initialAngle,length,treeDepth,factor,angle)
 
+    val acc = 1
+    val p = L2D(start,initialAngle,length,colorMap(acc-1))
 
-    //mkGraph(Pt2D(0, 0), 0, 100, 0, 1, 0)
-
+    createGraph(p,acc)
  }
 
 }
