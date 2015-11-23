@@ -1,5 +1,6 @@
 package fhj.swengb.assignments.tree.dkandlhofer
 
+import java.rmi.activation.ActivationGroup_Stub
 import javafx.scene.paint.Color
 
 import scala.math.BigDecimal.RoundingMode
@@ -40,12 +41,13 @@ object Graph {
     * @return
     */
 
-  def traverse[A, B](tree: Tree[A])(convert: Seq[A] => Seq[B]): Seq[B] = {
-    def map[A](tree1: Tree[A],acc: Seq[A]): Seq[A] = tree1 match {
-      case Branch(l,r) => map(l,acc);map(r,acc)
-      case Node(a) => Seq(a) ++ acc
+  def traverse[A, B](tree: Tree[A])(convert: Seq[A] => Seq[B]): Seq[B] ={
+
+    def map(t: Tree[A],acc: Seq[A]): Seq[A] = t match {
+      case Node(v) => Seq(v) ++ acc
+      case Branch(l,r) => map(l,acc) ++ acc ++ map(r,acc)
     }
-    convert(map(tree,Nil))
+    convert(map(tree,Seq()))
     }
 
   /**
@@ -70,15 +72,23 @@ object Graph {
               colorMap: Map[Int, Color] = Graph.colorMap): Tree[L2D] = {
     assert(treeDepth <= colorMap.size, s"Treedepth higher than color mappings - bailing out ...")
 
+    val rootNode = Node(L2D.apply(start,initialAngle,length,colorMap(0)))
+    val tree1 = Branch(rootNode, Branch(Node(L2D.apply(start,initialAngle-angle,length,colorMap(0))),Node(L2D.apply(start,initialAngle+angle,length,colorMap(0)))))
+
     def createGraph(start:Pt2D, iA:AngleInDegrees,len:Double,depth:Int,factor:Double,angle:Double): Tree[L2D] = depth match {
-      case 0 => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
-      case _ => Branch(Node(L2D.apply(start,initialAngle-angle,length*factor,colorMap(0))),Node(L2D.apply(start,initialAngle+angle,length*factor,colorMap(1))))//;createGraph(start,iA,len*factor,depth-1,factor,angle)
-      //case _ => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
+      case 0 => rootNode
+      case v if v >0 => tree1
+      /*{
+        Branch(Node(L2D.apply(start, initialAngle - angle, length, colorMap(0))), Node(L2D.apply(start, initialAngle + angle, length, colorMap(0))))
+        //createGraph(start, iA, len - factor, depth - 1, factor, angle)
+      }*/
+      case _ => Node(L2D.apply(start,initialAngle,length,colorMap(0)))
     }
     createGraph(start,initialAngle,length,treeDepth,factor,angle)
 
 
     //mkGraph(Pt2D(0, 0), 0, 100, 0, 1, 0)
+
  }
 
 }
