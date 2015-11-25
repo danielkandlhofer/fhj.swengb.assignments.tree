@@ -74,12 +74,12 @@ object Graph {
 
     def createGraph(start:L2D, acc: Int): Tree[L2D] = acc match {
       case root if treeDepth == 0 => Node(start)
-      case nodes if acc == treeDepth => Branch(Node(start),Branch(Node(start.left(factor,angle,colorMap(acc-1))),Node(start.right(factor,angle,colorMap(acc-1)))))
-      case _ => Branch(Node(start),Branch(createGraph(start.left(factor,angle,colorMap(acc-1)),acc+1),createGraph(start.right(factor,angle,colorMap(acc-1)),acc+1)))
+      case nodes if treeDepth == acc + 1 => Branch(Node(start),Branch(Node(start.left(factor,angle,colorMap(acc))),Node(start.right(factor,angle,colorMap(acc)))))
+      case _ => Branch(Node(start),Branch(createGraph(start.left(factor,angle,colorMap(acc)),acc+1),createGraph(start.right(factor,angle,colorMap(acc)),acc+1)))
     }
 
-    val acc = 1
-    val p = L2D(start,initialAngle,length,colorMap(acc-1))
+    val acc = 0
+    val p = L2D.apply(start,initialAngle,length,colorMap(acc))
 
     createGraph(p,acc)
  }
